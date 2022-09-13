@@ -164,14 +164,14 @@ class Database:
         return datas
 
     """
-        Function : produce
+        Function : publish
         @sync
-        About : Produce data to consumers
+        About : Publish data to subscribers
         Param :
             - String : topic
             - String : data
     """
-    def produce(self,topic="",data=""):
+    def publish(self,topic="",data=""):
         if not topic:
             return
         
@@ -186,15 +186,15 @@ class Database:
         lock.release()
 
     """
-        Function : consume
+        Function : subscribe
         @sync
-        About : Consume data from producers
+        About : Subscribe data from publisher
         Param :
             - String : topic
         Return :
             - data
     """
-    def consume(self,topic = "") -> str:
+    def subscribe(self,topic = "") -> str:
         if not topic:
             return ""
         

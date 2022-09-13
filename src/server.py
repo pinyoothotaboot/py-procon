@@ -8,6 +8,7 @@ from datetime import datetime
 from connection import Connection
 from mutex import Mutex
 from log import Logger
+from database import Database
 
 log = Logger('SERVER').get_logger()
 
@@ -21,6 +22,7 @@ class Server:
         self.server_mutex = Mutex()
         self.connections = dict()
         self.clients = list()
+        self.database = Database()
         self.BUFFER_SIZE = 1024
 
         self.initial_socket_server()
@@ -62,7 +64,7 @@ class Server:
             log.warn("[add_connection()] - Not found lock")
             return
         
-        connection = Connection(connection=conn,addr=addr,key_selector=key_selector)
+        connection = Connection(socket=conn,addr=addr,key_selector=key_selector)
         lock.acquire()
 
         if connection.get_name() not in self.connections:
