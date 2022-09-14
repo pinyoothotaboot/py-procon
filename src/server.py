@@ -54,8 +54,8 @@ class Server:
     def initial_lock(self):
         self.server_mutex.add_lock("connections")
         self.server_mutex.add_lock("clients")
+        self.server_mutex.add_lock("database")
     
-
     def add_connection(self,conn = None,addr = None,key_selector = None):
         if conn is None:
             log.warn("[add_connection()] - Not found connection")
