@@ -1,8 +1,9 @@
 import sys
-sys.path.append('..')
+import os
+sys.path.append(os.getcwd())
 import uuid
 from typing import List
-from ..mutex import Mutex
+from src.mutex import Mutex
 
 class DbStack:
     def __init__(self,name = uuid.uuid1()):

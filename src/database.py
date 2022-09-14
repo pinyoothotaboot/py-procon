@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.getcwd())
 import uuid
 from mutex import Mutex
 from typing import List,Dict
@@ -6,11 +9,11 @@ from store.db_queue import DbQueue
 from store.db_stack import DbStack
 
 class Database:
-    def __init__(self) -> None:
+    def __init__(self):
         self.id = uuid.uuid1()
-        self.stacks = Dict()
-        self.queues = Dict()
-        self.hashmaps = Dict()
+        self.stacks = dict()
+        self.queues = dict()
+        self.hashmaps = dict()
         self.lock = Mutex()
 
         self.stack_id = "stacks-{}".format(self.id)
@@ -218,14 +221,14 @@ class Database:
         lock_queue = self.get_lock(self.queue_id)
         with lock_queue:
             self.queues = None
-            self.queues = Dict()
+            self.queues = dict()
         
         lock_stack = self.get_lock(self.stack_id)
         with lock_stack:
             self.stacks = None
-            self.stacks = Dict()
+            self.stacks = dict()
         
         lock_hashmap = self.get_lock(self.hashmap_id)
         with lock_hashmap:
             self.hashmaps = None
-            self.hashmaps = Dict()
+            self.hashmaps = dict()

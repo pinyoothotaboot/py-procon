@@ -1,4 +1,5 @@
 import sys
+sys.path.append('..')
 import selectors
 import socket
 import threading
@@ -9,6 +10,7 @@ from connection import Connection
 from mutex import Mutex
 from log import Logger
 from database import Database
+from parse import parse_to_json
 
 log = Logger('SERVER').get_logger()
 
@@ -157,6 +159,8 @@ class Server:
             if mask & selectors.EVENT_WRITE:
                 if data.outb:
                     message = data.outb
+                    packet = parse_to_json(message.decode())
+                    print("PACKET :",packet)
                     sent = sock.send(f"You say : {message.decode()}".encode())
                     data.outb = data.outb[sent:]
 
