@@ -89,7 +89,7 @@ def map_packet(data_list  = []) -> Dict:
         - String : data
     Pattern :
         - <PUBLISH<>topic<>payload>
-        - <SUBSCRIBE<>topic>
+        - <SUBSCRIBE<>[topic]>
         - <UNSUBSCRIBE<>topic>
         - <SET<>topic<>key<>payload>
         - <GET<>topic<>key>

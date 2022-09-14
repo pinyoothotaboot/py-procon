@@ -11,6 +11,7 @@ from mutex import Mutex
 from log import Logger
 from database import Database
 from parse import parse_to_json
+from handle import handle_receive
 
 log = Logger('SERVER').get_logger()
 
@@ -55,6 +56,7 @@ class Server:
         self.server_mutex.add_lock("connections")
         self.server_mutex.add_lock("clients")
         self.server_mutex.add_lock("database")
+        self.server_mutex.add_lock("handle")
     
     def add_connection(self,conn = None,addr = None,key_selector = None):
         if conn is None:
@@ -71,6 +73,7 @@ class Server:
 
         if connection.get_name() not in self.connections:
             self.connections[connection.get_name()] = connection
+        
         lock.release()
     
     def delete_connection(self,conn = None):
@@ -140,6 +143,22 @@ class Server:
         except Exception as ex:
             log.error("[on_close()] - Cannot close connection : {}".format(ex))
     
+    def handle(self,sock = None,message = "",data = None):
+        lock = self.server_mutex.get_lock("connections")
+        if lock is None:
+            log.warn("[handle()] - Not found lock")
+            return
+
+        lock_database = self.server_mutex.get_lock("database")
+        sent = 0
+        lock.acquire()
+        if sock.fileno() in self.connections:
+            connection = self.connections[sock.fileno()]
+            sent = handle_receive(message,connection,self.database,lock_database)
+
+        data.outb = data.outb[sent:]
+        lock.release()
+
     def on_read(self,key = None,mask = None):
         if (key is None) or (mask is None):
             log.warn("[on_read()] - Not found key or mask")
@@ -159,10 +178,7 @@ class Server:
             if mask & selectors.EVENT_WRITE:
                 if data.outb:
                     message = data.outb
-                    packet = parse_to_json(message.decode())
-                    print("PACKET :",packet)
-                    sent = sock.send(f"You say : {message.decode()}".encode())
-                    data.outb = data.outb[sent:]
+                    self.handle(sock,message,data)
 
         except ConnectionResetError:
             self.on_close(key.fileobj)

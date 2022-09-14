@@ -8,7 +8,7 @@ from src.mutex import Mutex
 class DbHashMap:
     def __init__(self,name=uuid.uuid1()):
         self.name = name
-        self.hash = Dict()
+        self.hash = dict()
         self.lock = Mutex()
         self.lock.add_lock("hash-{}".format(self.name))
     
@@ -151,6 +151,6 @@ class DbHashMap:
         lock = self.get_lock()
         lock.acquire()
         self.hash = None
-        self.hash = Dict()
+        self.hash = dict()
         lock.release()
 

@@ -10,7 +10,7 @@ class Connection:
         self.address = addr
         self.key_selector = key_selector
         self.has_subscriber = False
-        self.subscribes = Set()
+        self.subscribes = set()
         self.lock = Mutex()
 
         self.subscribe_id = "subscribes-{}".format(self.id)
@@ -26,6 +26,9 @@ class Connection:
     """
     def get_name(self):
         return self.name
+    
+    def get_sock(self):
+        return self.socket
     
     """
         Function : initial_lock
