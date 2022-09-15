@@ -9,14 +9,7 @@ class Connection:
         self.name = self.socket.fileno()
         self.address = addr
         self.key_selector = key_selector
-        self.has_subscriber = False
-        self.subscribes = set()
-        self.lock = Mutex()
 
-        self.subscribe_id = "subscribes-{}".format(self.id)
-
-        self.initial_lock()
-    
     """
         Function : get_name
         @sync
@@ -29,84 +22,7 @@ class Connection:
     
     def get_sock(self):
         return self.socket
-    
-    """
-        Function : initial_lock
-        @sync
-        About : Initial mutex locking
-    """
-    def initial_lock(self):
-        self.lock.add_lock(self.subscribe_id)
-    
-    """
-        Function : get_lock
-        @sync
-        About : Get mutex lock by id
-        Param :
-            - String : id
-        Return :
-            - lock
-    """
-    def get_lock(self,id = ""):
-        return self.lock.get_lock(id)
-    
-    """
-        Function : subscribe
-        @sync
-        About : Subscribe topic
-        Param :
-            - Array : topics
-    """
-    def subscribe(self,topics = []):
-        if not topics:
-            return
-        
-        lock = self.get_lock(self.subscribe_id)
-        lock.acquire()
-        for topic in topics:
-            if topic not in self.subscribes:
-                self.subscribes.add(topic)
-        lock.release()
 
-    """
-        Function : has_subscribe
-        @sync
-        About : Check subscribe by topic
-        Param : 
-            - String : topic
-        Return :
-            - True/False
-    """
-    def has_subscribe(self,topic = "") -> bool:
-        if not topic:
-            return False
-        
-        status = False
-        lock = self.get_lock(self.subscribe_id)
-        lock.acquire()
-        if topic in self.subscribes:
-            status = True
-        lock.release()
-
-        return status
-    
-    """
-        Function : unsubscribe
-        @sync
-        About : Unsubscribe topic
-        Param :
-            - String : topic
-    """
-    def unsubscribe(self,topic = ""):
-        if not topic:
-            return
-        
-        lock = self.get_lock(self.subscribe_id)
-        lock.acquire()
-        if topic in self.subscribes:
-            self.subscribes.remove(topic)
-        lock.release()
-    
     """
         Function : notify
         @sync
@@ -114,9 +30,15 @@ class Connection:
         Param :
             - String : payload
     """
-    def notify(self,payload = ""):
+    def notify(self,payload = "",data = None):
         if not payload:
-            return 0
+            return
         
+        #self.socket.sendall(payload.encode())
         sent = self.socket.send(payload.encode())
-        return sent
+        data.outb = data.outb[sent:]
+    def publish(self,payload = ""):
+        if not payload:
+            return
+        
+        self.socket.sendall(payload.encode())

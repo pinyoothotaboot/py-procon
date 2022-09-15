@@ -106,7 +106,7 @@ def map_packet(data_list  = []) -> Dict:
         }
 """
 def parse_to_json(data ="") -> Dict:
-
+    print("DATA",data)
     if not data:
         return packet({},"Data is empty!.",WARNING)
 

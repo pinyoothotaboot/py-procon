@@ -2,10 +2,8 @@ import json
 from constant import *
 
 
-def cmd_set(payload = {},connection = None , database = None , lock = None):
-    sent = 0
+def cmd_set(payload = {},connection = None , database = None , lock = None,data = None):
     flag = False
-
     lock.acquire()
     try:
         key = payload["data"]["key"]
@@ -18,14 +16,11 @@ def cmd_set(payload = {},connection = None , database = None , lock = None):
     lock.release()
 
     if flag:
-        sent = connection.notify(f"{SET} Set data success")
+        connection.notify(f"{SET} Set data success",data)
     else:
-        sent = connection.notify(f"Cannot set data")
+        connection.notify(f"Cannot set data",data)
 
-    return sent
-
-def cmd_get(payload = {},connection = None , database = None , lock = None):
-    sent = 0
+def cmd_get(payload = {},connection = None , database = None , lock = None,data = None):
     flag = False
     resp = ""
 
@@ -41,14 +36,12 @@ def cmd_get(payload = {},connection = None , database = None , lock = None):
     lock.release()
 
     if flag:
-        sent = connection.notify(f"{GET} {resp}")
+        connection.notify(f"{GET} {resp}",data)
     else:
-        sent = connection.notify(f"Cannot get data")
+        connection.notify(f"Cannot get data",data)
     
-    return sent
 
-def cmd_push(payload = {},connection = None , database = None , lock = None):
-    sent = 0
+def cmd_push(payload = {},connection = None , database = None , lock = None,data = None):
     flag = False
 
     lock.acquire()
@@ -63,14 +56,11 @@ def cmd_push(payload = {},connection = None , database = None , lock = None):
     lock.release()
 
     if flag:
-        sent = connection.notify(f"{PUSH} Push data success")
+        connection.notify(f"{PUSH} Push data success",data)
     else:
-        sent = connection.notify(f"Cannot push data")
+        connection.notify(f"Cannot push data",data)
 
-    return sent
-
-def cmd_pop(payload = {},connection = None , database = None , lock = None):
-    sent = 0
+def cmd_pop(payload = {},connection = None , database = None , lock = None,data = None):
     flag = False
     resp = ""
     lock.acquire()
@@ -84,14 +74,11 @@ def cmd_pop(payload = {},connection = None , database = None , lock = None):
     lock.release()
 
     if flag:
-        sent = connection.notify(f"{POP} {resp}")
+        connection.notify(f"{POP} {resp}",data)
     else:
-        sent = connection.notify(f"Cannot pop data")
+        connection.notify(f"Cannot pop data",data)
 
-    return sent
-
-def cmd_range(payload = {},connection = None , database = None , lock = None):
-    sent = 0
+def cmd_range(payload = {},connection = None , database = None , lock = None,data = None):
     flag = False
     resp = []
 
@@ -108,17 +95,12 @@ def cmd_range(payload = {},connection = None , database = None , lock = None):
     lock.release()
 
     if flag:
-        sent = connection.notify(f"{RANGE} {resp}")
+        connection.notify(f"{RANGE} {resp}",data)
     else:
-        sent = connection.notify(f"Cannot list range data")
+        connection.notify(f"Cannot list range data",data)
 
-    return sent
-
-
-def cmd_publish(payload = {},connection = None , database = None , lock = None):
-    sent = 0
+def cmd_publish(payload = {},connection = None , database = None , lock = None,data=None):
     flag = False
-
     lock.acquire()
     try:
         topic = payload["topic"]
@@ -131,44 +113,28 @@ def cmd_publish(payload = {},connection = None , database = None , lock = None):
     lock.release()
 
     if flag:
-        sent = connection.notify(f"{PUBLISH} Publish data success")
+        connection.notify(f"{PUBLISH} Publish data success",data)
     else:
-        sent = connection.notify(f"Cannot publish data")
+        connection.notify(f"Cannot publish data",data)
 
-    return sent
 
-def cmd_subscribe(payload = {},connection = None):
-    sent = 0
-    flag = False
-
+def cmd_subscribe(payload = {},subscriber = None,lock_subscriber = None,connection = None,data=None):
+    lock_subscriber.acquire()
     try:
-        topics = json.load(payload["topic"])
-        connection.subscribe(topics)
-        flag = True
-    except ValueError:
-        pass
+        topics = json.loads(str(payload["topic"]))
+        subscriber.subscribe(topics,connection,data)
+    except Exception as ex:
+        connection.notify(f"Cannot subscribe",data)
 
-    if flag:
-        sent = connection.notify(f"{SUBSCRIBE} Subscribe topic success")
-    else:
-        sent = connection.notify(f"Cannot subscribe topic ")
-    
-    return sent
+    lock_subscriber.release()
 
-def cmd_unsubscribe(payload = {},connection = None):
-    sent = 0
-    flag = False
-
+def cmd_unsubscribe(payload = {},subscriber = None,lock_subscriber = None,connection = None,data = None):
+    lock_subscriber.acquire()
     try:
         topic = payload["topic"]
-        connection.unsubscribe(topic)
-        flag = True
-    except ValueError:
-        pass
+        subscriber.unsubscribe(topic,connection,data)
+    except Exception as ex:
+        connection.notify(f"Cannot unsubscribe",data)
 
-    if flag:
-        sent = connection.notify(f"{UNSUBSCRIBE} Unsubscribe topic success")
-    else:
-        sent = connection.notify(f"Cannot unsubscribe topic ")
+    lock_subscriber.release()
     
-    return sent

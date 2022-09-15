@@ -2,45 +2,37 @@ from parse import parse_to_json
 from constant import *
 from command import *
 
-def case_command(payload = {},connection = None,database = None,lock_database = None):
+def case_command(payload = {},connection = None,database = None,lock_database = None,data = None):
     cmd = payload["command"]
-    sent = 0
     if cmd == SET:
-        sent = cmd_set(payload,connection,database,lock_database)
+        cmd_set(payload,connection,database,lock_database,data)
     elif cmd == GET:
-        sent = cmd_get(payload,connection,database,lock_database)
+        cmd_get(payload,connection,database,lock_database,data)
     elif cmd == PUSH:
-        sent = cmd_push(payload,connection,database,lock_database)
+        cmd_push(payload,connection,database,lock_database,data)
     elif cmd == POP:
-        sent = cmd_pop(payload,connection,database,lock_database)
+        cmd_pop(payload,connection,database,lock_database,data)
     elif cmd == RANGE:
-        sent = cmd_range(payload,connection,database,lock_database)
+        cmd_range(payload,connection,database,lock_database,data)
     elif cmd == PUBLISH:
-        sent = cmd_publish(payload,connection,database,lock_database)
+        cmd_publish(payload,connection,database,lock_database,data)
 
-    return sent
-
-def handle_receive(message = "",connection = None, database = None,lock_database = None):
+def handle_receive(message = "",connection = None, database = None,lock_database = None,subscriber = None , lock_subscriber = None,data = None):
     packet = parse_to_json(message.decode())
-    sock = connection.get_sock()
-    print("PACKET",packet)
-    sent = 0
     if packet["status"] != SUCCESS:
-        sent = connection.notify(packet["message"])
-        return sent
+        connection.notify(packet["message"],data)
+        return
     
     payload = packet["payload"]
     if not payload:
-        sent = connection.notify(f"Not found payload!.")
-        return sent
+        connection.notify(f"Not found payload!.",data)
+        return
     
     cmd = payload["command"]
     if cmd == SUBSCRIBE:
-        sent = cmd_subscribe(payload,connection)
+        cmd_subscribe(payload,subscriber,lock_subscriber,connection,data)
     elif cmd == UNSUBSCRIBE:
-        sent = cmd_unsubscribe(payload,connection)
+        cmd_unsubscribe(payload,subscriber,lock_subscriber,connection,data)
     else:
-        sent = case_command(payload,connection,database,lock_database)
-
-    return sent
+        case_command(payload,connection,database,lock_database,data)
     
