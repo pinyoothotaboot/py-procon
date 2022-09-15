@@ -2,7 +2,7 @@ import json
 from constant import *
 
 
-def cmd_set(payload = {},sock = None , database = None , lock = None):
+def cmd_set(payload = {},connection = None , database = None , lock = None):
     sent = 0
     flag = False
 
@@ -18,13 +18,13 @@ def cmd_set(payload = {},sock = None , database = None , lock = None):
     lock.release()
 
     if flag:
-        sent = sock.send(f"{SET} Set data success".encode())
+        sent = connection.notify(f"{SET} Set data success")
     else:
-        sent = sock.send(f"Cannot set data".encode())
+        sent = connection.notify(f"Cannot set data")
 
     return sent
 
-def cmd_get(payload = {},sock = None , database = None , lock = None):
+def cmd_get(payload = {},connection = None , database = None , lock = None):
     sent = 0
     flag = False
     resp = ""
@@ -41,13 +41,13 @@ def cmd_get(payload = {},sock = None , database = None , lock = None):
     lock.release()
 
     if flag:
-        sent = sock.send(f"{GET} {resp}".encode())
+        sent = connection.notify(f"{GET} {resp}")
     else:
-        sent = sock.send(f"Cannot get data".encode())
+        sent = connection.notify(f"Cannot get data")
     
     return sent
 
-def cmd_push(payload = {},sock = None , database = None , lock = None):
+def cmd_push(payload = {},connection = None , database = None , lock = None):
     sent = 0
     flag = False
 
@@ -63,13 +63,13 @@ def cmd_push(payload = {},sock = None , database = None , lock = None):
     lock.release()
 
     if flag:
-        sent = sock.send(f"{PUSH} Push data success".encode())
+        sent = connection.notify(f"{PUSH} Push data success")
     else:
-        sent = sock.send(f"Cannot push data".encode())
+        sent = connection.notify(f"Cannot push data")
 
     return sent
 
-def cmd_pop(payload = {},sock = None , database = None , lock = None):
+def cmd_pop(payload = {},connection = None , database = None , lock = None):
     sent = 0
     flag = False
     resp = ""
@@ -84,13 +84,13 @@ def cmd_pop(payload = {},sock = None , database = None , lock = None):
     lock.release()
 
     if flag:
-        sent = sock.send(f"{POP} {resp}".encode())
+        sent = connection.notify(f"{POP} {resp}")
     else:
-        sent = sock.send(f"Cannot pop data".encode())
+        sent = connection.notify(f"Cannot pop data")
 
     return sent
 
-def cmd_range(payload = {},sock = None , database = None , lock = None):
+def cmd_range(payload = {},connection = None , database = None , lock = None):
     sent = 0
     flag = False
     resp = []
@@ -108,14 +108,14 @@ def cmd_range(payload = {},sock = None , database = None , lock = None):
     lock.release()
 
     if flag:
-        sent = sock.send(f"{RANGE} {resp}".encode())
+        sent = connection.notify(f"{RANGE} {resp}")
     else:
-        sent = sock.send(f"Cannot list range data".encode())
+        sent = connection.notify(f"Cannot list range data")
 
     return sent
 
 
-def cmd_publish(payload = {},sock = None , database = None , lock = None):
+def cmd_publish(payload = {},connection = None , database = None , lock = None):
     sent = 0
     flag = False
 
@@ -131,13 +131,13 @@ def cmd_publish(payload = {},sock = None , database = None , lock = None):
     lock.release()
 
     if flag:
-        sent = sock.send(f"{PUBLISH} Publish data success".encode())
+        sent = connection.notify(f"{PUBLISH} Publish data success")
     else:
-        sent = sock.send(f"Cannot publish data".encode())
+        sent = connection.notify(f"Cannot publish data")
 
     return sent
 
-def cmd_subscribe(payload = {},sock = None ,connection = None):
+def cmd_subscribe(payload = {},connection = None):
     sent = 0
     flag = False
 
@@ -149,13 +149,13 @@ def cmd_subscribe(payload = {},sock = None ,connection = None):
         pass
 
     if flag:
-        sent = sock.send(f"{SUBSCRIBE} Subscribe topic success".encode())
+        sent = connection.notify(f"{SUBSCRIBE} Subscribe topic success")
     else:
-        sent = sock.send(f"Cannot subscribe topic ".encode())
+        sent = connection.notify(f"Cannot subscribe topic ")
     
     return sent
 
-def cmd_unsubscribe(payload = {},sock = None ,connection = None):
+def cmd_unsubscribe(payload = {},connection = None):
     sent = 0
     flag = False
 
@@ -167,8 +167,8 @@ def cmd_unsubscribe(payload = {},sock = None ,connection = None):
         pass
 
     if flag:
-        sent = sock.send(f"{UNSUBSCRIBE} Unsubscribe topic success".encode())
+        sent = connection.notify(f"{UNSUBSCRIBE} Unsubscribe topic success")
     else:
-        sent = sock.send(f"Cannot unsubscribe topic ".encode())
+        sent = connection.notify(f"Cannot unsubscribe topic ")
     
     return sent

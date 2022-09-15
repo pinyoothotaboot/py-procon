@@ -116,6 +116,7 @@ class Connection:
     """
     def notify(self,payload = ""):
         if not payload:
-            return
+            return 0
         
-        self.socket.send(payload.encode())
+        sent = self.socket.send(payload.encode())
+        return sent
