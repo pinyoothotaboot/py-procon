@@ -18,7 +18,7 @@ class Server:
     def __init__(self,host = "127.0.0.1",port = 3456) -> None:
         self.host = host
         self.port = port
-        self.socket_server = socket.socket()
+        self.socket_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.selector = selectors.DefaultSelector()
         self.DO_BLOCKING = False
         self.server_mutex = Mutex()
@@ -119,7 +119,7 @@ class Server:
         if sock is None:
             log.warn("[on_accept()] - Not found socket")
             return
-
+            
         try:
             conn,addr = sock.accept()
             conn.setblocking(self.DO_BLOCKING)
@@ -161,8 +161,6 @@ class Server:
         if sock.fileno() in self.connections:
             connection = self.connections[sock.fileno()]
             handle_receive(message,connection,self.database,lock_database,self.subscriber,lock_subscriber,data)
-
-        #data.outb = data.outb[sent:]
         lock.release()
 
     def subscriber_broadcast(self,connection,database,lock_database):
@@ -203,6 +201,7 @@ class Server:
 
             if mask & selectors.EVENT_READ:
                 recv_data = sock.recv(self.BUFFER_SIZE)
+                print("RECV",data)
                 if recv_data:
                     data.outb += recv_data
                 else:
@@ -212,9 +211,7 @@ class Server:
                 if data.outb:
                     message = data.outb
                     self.handle_receive(sock,message,data)
-                    #sent = sock.send(f"Get data successed".encode())
-                    #data.outb = data.outb[sent:]
-
+        
         except ConnectionResetError:
             self.on_close(key.fileobj)
     
@@ -226,7 +223,7 @@ class Server:
         thread.start()
 
         while True:
-            events = self.selector.select(timeout=0.2)
+            events = self.selector.select(timeout=None)
             for key,mask in events:
                 if key.data is None:
                     self.on_accept(key.fileobj)

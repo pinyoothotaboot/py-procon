@@ -35,8 +35,11 @@ class Connection:
             return
         
         #self.socket.sendall(payload.encode())
+        print("PAYLOAD",payload)
         sent = self.socket.send(payload.encode())
+        print("BEFORE SENT",sent,"OUTB",data.outb)
         data.outb = data.outb[sent:]
+
     def publish(self,payload = ""):
         if not payload:
             return

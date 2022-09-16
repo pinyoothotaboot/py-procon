@@ -109,13 +109,15 @@ def cmd_publish(payload = {},connection = None , database = None , lock = None,d
         flag = True
     except ValueError:
         pass
-
-    lock.release()
-
+    
     if flag:
         connection.notify(f"{PUBLISH} Publish data success",data)
     else:
         connection.notify(f"Cannot publish data",data)
+        
+    lock.release()
+
+    
 
 
 def cmd_subscribe(payload = {},subscriber = None,lock_subscriber = None,connection = None,data=None):

@@ -89,7 +89,7 @@ def map_packet(data_list  = []) -> Dict:
         - String : data
     Pattern :
         - <PUBLISH<>topic<>payload>
-        - <SUBSCRIBE<>[topic]>
+        - <SUBSCRIBE<>["topic"]>
         - <UNSUBSCRIBE<>topic>
         - <SET<>topic<>key<>payload>
         - <GET<>topic<>key>
@@ -106,7 +106,7 @@ def map_packet(data_list  = []) -> Dict:
         }
 """
 def parse_to_json(data ="") -> Dict:
-    print("DATA",data)
+    print("DATA5555",data,"TYPE",type(data))
     if not data:
         return packet({},"Data is empty!.",WARNING)
 

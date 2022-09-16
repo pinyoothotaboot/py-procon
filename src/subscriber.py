@@ -21,13 +21,15 @@ class Subscriber:
         self.lock.add_lock(self.get_cashed_id())
     
     def subscribe(self,topics = [],connection = None,data = None):
+        print("BUG 1")
         if not topics or connection is None:
-            connection.notify(f"Data has none!.")
+            connection.notify(f"Data has none!.",data)
             return 
 
         lock = self.lock.get_lock(self.get_subscriber_id())
         flag = False
         lock.acquire()
+        print("BUG 2")
         for topic in topics:
             if not topic:
                 continue
@@ -39,14 +41,19 @@ class Subscriber:
             else:
                 self.subscribers[topic].add(connection.get_name())
                 flag = True
+        print("BUG 3")
         lock.release()
         if flag:
             connection.notify(f"Subscribe successed",data)
+            print("BUG 4")
         else:
             connection.notify(f"Cannot subscribe!.",data)
+            print("BUG 5")
+        
 
     def unsubscribe(self,topic="",connection = None,data = None):
         if not topic or connection is None:
+            connection.notify(f"Data has none!.",data)
             return
         
         lock = self.lock.get_lock(self.get_subscriber_id())
