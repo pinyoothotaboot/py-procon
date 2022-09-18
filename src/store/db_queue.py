@@ -9,7 +9,7 @@ class DbQueue:
     def __init__(self,name = uuid.uuid1()):
         self.name = name
         self.lock = Mutex()
-        self.queue = Queue()
+        self.queue = []
         self.lock.add_lock("queue-{}".format(self.name))
     
     """
@@ -40,12 +40,7 @@ class DbQueue:
             - True/False
     """
     def is_empty(self) -> bool:
-        status = False
-        lock = self.get_lock()
-        lock.acquire()
-        status = self.queue.empty()
-        lock.release()
-        return status
+        return len(self.queue) == 0
     
     """
         Function : add
@@ -64,11 +59,8 @@ class DbQueue:
             return False
 
         status = False
-        lock = self.get_lock()
-        lock.acquire()
-        self.queue.put(data)
+        self.queue.append(data)
         status = True
-        lock.release()
         return status
     
     """
@@ -80,10 +72,8 @@ class DbQueue:
     """
     def get(self) -> str:
         data = ""
-        lock = self.get_lock()
-        lock.acquire()
-        data = self.queue.get()
-        lock.release()
+        if not self.is_empty():
+            data = self.queue.pop(0)
         return data
     
     """
@@ -92,8 +82,5 @@ class DbQueue:
         About : Clear data in queue
     """
     def clear(self):
-        lock = self.get_lock()
-        lock.acquire()
-        self.queue = None
-        self.queue = Queue()
-        lock.release()
+        self.queue = []
+            

@@ -208,7 +208,6 @@ class Database:
             queue = self.queues[topic]
             data = queue.get()
         lock.release()
-
         return data
 
     """

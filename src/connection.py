@@ -3,12 +3,11 @@ from mutex import Mutex
 from typing import Set
 
 class Connection:
-    def __init__(self,socket = None,addr = None,key_selector = None) -> None:
+    def __init__(self,socket = None,addr = None) -> None:
         self.id = uuid.uuid1()
         self.socket = socket
         self.name = self.socket.fileno()
         self.address = addr
-        self.key_selector = key_selector
 
     """
         Function : get_name
@@ -22,6 +21,9 @@ class Connection:
     
     def get_sock(self):
         return self.socket
+    
+    def get_address(self):
+        return "{}:{}".format(self.address[0],self.address[1])
 
     """
         Function : notify
@@ -34,11 +36,7 @@ class Connection:
         if not payload:
             return
         
-        #self.socket.sendall(payload.encode())
-        print("PAYLOAD",payload)
-        sent = self.socket.send(payload.encode())
-        print("BEFORE SENT",sent,"OUTB",data.outb)
-        data.outb = data.outb[sent:]
+        self.socket.sendall(payload.encode())
 
     def publish(self,payload = ""):
         if not payload:

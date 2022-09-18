@@ -1,7 +1,9 @@
 from mutex import Mutex
+from log import Logger
+
+log = Logger('SUBSCRIBER').get_logger()
 
 class Subscriber:
-
     def __init__(self):
         self.subscribers = dict()
         self.casheds = dict()
@@ -21,7 +23,7 @@ class Subscriber:
         self.lock.add_lock(self.get_cashed_id())
     
     def subscribe(self,topics = [],connection = None,data = None):
-        print("BUG 1")
+
         if not topics or connection is None:
             connection.notify(f"Data has none!.",data)
             return 
@@ -29,7 +31,7 @@ class Subscriber:
         lock = self.lock.get_lock(self.get_subscriber_id())
         flag = False
         lock.acquire()
-        print("BUG 2")
+
         for topic in topics:
             if not topic:
                 continue
@@ -38,19 +40,18 @@ class Subscriber:
                 subscriber.add(connection.get_name())
                 self.subscribers[topic] = subscriber
                 flag = True
+                log.info("Subscribe new topic : {}".format(topic))
             else:
                 self.subscribers[topic].add(connection.get_name())
                 flag = True
-        print("BUG 3")
+                log.info("Add new subscriber : {}".format(connection.get_name()))
+
         lock.release()
         if flag:
             connection.notify(f"Subscribe successed",data)
-            print("BUG 4")
         else:
             connection.notify(f"Cannot subscribe!.",data)
-            print("BUG 5")
         
-
     def unsubscribe(self,topic="",connection = None,data = None):
         if not topic or connection is None:
             connection.notify(f"Data has none!.",data)
@@ -64,6 +65,7 @@ class Subscriber:
             if connection.get_name() in self.subscribers[topic]:
                 self.subscribers[topic].remove(connection.get_name())
                 flag = True
+                log.info("Connection id : {} has unsubsribe topic {} successed".format(connection.get_name(),topic))
         
         lock.release()
 
@@ -83,28 +85,22 @@ class Subscriber:
         for topic in self.subscribers:
             if connection.get_name() not in self.subscribers[topic]:
                 continue
-
+            
             resp = ""
-
             lock_cashed.acquire()
             if topic not in self.casheds:
                 lock_database.acquire()
                 resp = database.subscribe(topic)
                 lock_database.release()
-
-                if not resp:
-                    continue
-
-                self.casheds[topic] = resp
+                if resp:
+                    self.casheds[topic] = resp
             else:
                 resp = self.casheds[topic]
 
             lock_cashed.release()
-
-            connection.publish(resp)
-        
+            connection.notify(resp)
         lock_subscriber.release()
-    
+
     def clear_cashed(self):
         lock_cashed = self.lock.get_lock(self.get_cashed_id())
         lock_cashed.acquire()
@@ -122,5 +118,6 @@ class Subscriber:
         for topic in self.subscribers:
             if connection.get_name() in self.subscribers[topic]:
                 self.subscribers[topic].remove(connection.get_name())
+                log.info("Disconnected connection id : {} from topic : {}".format(connection.get_name(),topic))
 
         lock.release()

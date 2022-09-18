@@ -1,52 +1,55 @@
+import sys
 import socket
-import selectors
-import types
+import time
+import threading
 
-host = "127.0.0.1"
-port = 3456
-num_conns = 2
-messages = [b'Message 1 from client.', b'Message 2 from client.']
+class Client:
+    def __init__(self,host = "127.0.0.1",port = 3456):
+        self.host = host
+        self.port = port
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.do_runing = True
+        self.BUFFER_SIZE = 2048
 
-def start_connections(host, port, num_conns):
-    server_addr = (host, port)
-    for i in range(0, num_conns):
-        connid = i + 1
-        print('starting connection', connid, 'to', server_addr)
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.setblocking(False)
-        sock.connect_ex(server_addr)
-        events = selectors.EVENT_READ | selectors.EVENT_WRITE
-        data = types.SimpleNamespace(connid=connid,
-                                     msg_total=sum(len(m) for m in messages),
-                                     recv_total=0,
-                                     messages=list(messages),
-                                     outb=b'')
-        sel.register(sock, events, data=data)
+        self.connect()
+    
+    def connect(self):
+        try:
+            self.sock.connect((self.host,self.port))
+        except socket.error as e:
+            print(str(e))
+    
+    def handle_recieve(self):
+        while self.do_runing:
+            print("Wait receiving...")
+            resp = self.sock.recv(self.BUFFER_SIZE)
+            if resp:
+                print("Received data : {}".format(resp.decode()))
+            
+            time.sleep(2)
 
-def service_connection(key, mask):
-    sock = key.fileobj
-    data = key.data
-    if mask & selectors.EVENT_READ:
-        recv_data = sock.recv(1024)
-        if recv_data:
-            print('received', repr(recv_data), 'from connection', data.connid)
-            data.recv_total += len(recv_data)
-        if not recv_data or data.recv_total == data.msg_total:
-            print('closing connection', data.connid)
-            sel.unregister(sock)
-            sock.close()
-    if mask & selectors.EVENT_WRITE:
-        if not data.outb and data.messages:
-            data.outb = data.messages.pop(0)
-        if data.outb:
-            print('sending', repr(data.outb), 'to connection', data.connid)
-            sent = sock.send(data.outb)
-            data.outb = data.outb[sent:]
+    def handle_send(self):
+        while self.do_runing:
+            data = input(':>')
+            if data:
+                print("Send data : {}".format(data))
+                self.sock.sendall(data.encode())
+            
+            time.sleep(0.2)
 
-sel = selectors.DefaultSelector()
-start_connections(host, port, num_conns)
 
-while True:
-    events = sel.select(timeout=None)
-    for key, mask in events:
-        service_connection(key, mask)
+    def run(self):
+        print("Starting : {}:{}".format(self.host,self.port))
+        thread = threading.Thread(target=self.handle_recieve)
+        thread.setDaemon(True)
+        thread.start()
+
+        self.handle_send()
+
+if __name__ == "__main__":
+    try:
+        client = Client()
+        client.run()
+    except KeyboardInterrupt:
+        print("Stop process..")
+        sys.exit()

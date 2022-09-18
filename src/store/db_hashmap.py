@@ -39,11 +39,7 @@ class DbHashMap:
     """
     def is_empty(self) -> bool:
         status = False
-
-        lock = self.get_lock()
-        lock.acquire()
         status = len(self.hash) == 0
-        lock.release()
         return status
     
     """
@@ -61,14 +57,11 @@ class DbHashMap:
             return False
         
         status = False
-        lock = self.get_lock()
-        lock.acquire()
         if key not in self.hash:
             self.hash[key] = [value]
         else:
             self.hash[key].append(value)
         status = True
-        lock.release()
 
         return status
     
@@ -87,8 +80,6 @@ class DbHashMap:
             return False
         
         status = False
-        lock = self.get_lock()
-        lock.acquire()
         if key not in self.hash:
             self.hash[key] = [value]
         else:
@@ -111,11 +102,8 @@ class DbHashMap:
             return []
         
         value = []
-        lock = self.get_lock()
-        lock.acquire()
         if key in self.hash:
             value = self.hash[key]
-        lock.release()
 
         return value
     
@@ -133,12 +121,9 @@ class DbHashMap:
             return False
         
         status = False
-        lock = self.get_lock()
-        lock.acquire()
         if key in self.hash:
             del self.hash[key]
         status = True
-        lock.release()
 
         return status
     
@@ -148,9 +133,5 @@ class DbHashMap:
         About : Clear datas in hashmap
     """
     def clear(self):
-        lock = self.get_lock()
-        lock.acquire()
-        self.hash = None
         self.hash = dict()
-        lock.release()
 

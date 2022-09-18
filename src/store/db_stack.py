@@ -39,11 +39,7 @@ class DbStack:
     """
     def is_empty(self) -> bool:
         status = False
-
-        lock = self.get_lock()
-        lock.acquire()
         status = len(self.stack) == 0
-        lock.release()
         return status
     
     """
@@ -63,11 +59,8 @@ class DbStack:
             return False
         
         status = False
-        lock = self.get_lock()
-        lock.acquire()
         self.stack.append(data)
         status = True
-        lock.release()
         return status
     
     """
@@ -82,10 +75,7 @@ class DbStack:
             return ""
         
         data = ""
-        lock = self.get_lock()
-        lock.acquire()
         data = self.stack[-1]
-        lock.release()
         return data
     
     """
@@ -100,11 +90,8 @@ class DbStack:
             return ""
         
         data = ""
-        lock = self.get_lock()
-        lock.acquire()
         data = self.stack[-1]
         self.stack.pop(-1)
-        lock.release()
         return data
     
     """
@@ -122,10 +109,7 @@ class DbStack:
             return []
         
         datas = []
-        lock = self.get_lock()
-        lock.acquire()
         datas = self.stack[start:stop]
-        lock.release()
         return datas
     
     """
@@ -134,7 +118,4 @@ class DbStack:
         About : Clear data in stack
     """
     def clear(self):
-        lock = self.get_lock()
-        lock.acquire()
         self.stack = []
-        lock.release()

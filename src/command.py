@@ -110,33 +110,39 @@ def cmd_publish(payload = {},connection = None , database = None , lock = None,d
     except ValueError:
         pass
     
+    
     if flag:
         connection.notify(f"{PUBLISH} Publish data success",data)
     else:
         connection.notify(f"Cannot publish data",data)
-        
+    
     lock.release()
 
-    
-
-
 def cmd_subscribe(payload = {},subscriber = None,lock_subscriber = None,connection = None,data=None):
-    lock_subscriber.acquire()
+    topics = []
     try:
         topics = json.loads(str(payload["topic"]))
-        subscriber.subscribe(topics,connection,data)
     except Exception as ex:
+        topics = []
         connection.notify(f"Cannot subscribe",data)
 
-    lock_subscriber.release()
+    if topics:
+        lock_subscriber.acquire()
+        subscriber.subscribe(topics,connection,data)
+        lock_subscriber.release()
 
 def cmd_unsubscribe(payload = {},subscriber = None,lock_subscriber = None,connection = None,data = None):
-    lock_subscriber.acquire()
+    topic = ""
     try:
         topic = payload["topic"]
-        subscriber.unsubscribe(topic,connection,data)
     except Exception as ex:
+        topic = ""
         connection.notify(f"Cannot unsubscribe",data)
+    
+    if topic:
+        lock_subscriber.acquire()
+        subscriber.unsubscribe(topic,connection,data)
+        lock_subscriber.release()
 
-    lock_subscriber.release()
+    
     
