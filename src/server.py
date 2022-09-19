@@ -10,15 +10,18 @@ from database import Database
 from handle import handle_receive
 from subscriber import Subscriber
 from constant import PUBLISH
+from read_config import initial_config
+
 log = Logger('SERVER').get_logger()
 
 class Server:
     def __init__(self,host="127.0.0.1",port=3456):
-        self.host = host
-        self.port = port
+        self.config = initial_config()
+        self.host = self.config['host']
+        self.port = self.config['port']
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.do_running = True
-        self.BUFFER_SIZE = 2048
+        self.BUFFER_SIZE = self.config['buff_size']
         self.connections = dict()
         self.server_mutex = Mutex()
         self.database = Database()
@@ -42,7 +45,7 @@ class Server:
     def listen(self):
         try:
             self.sock.bind((self.host, self.port))
-            self.sock.listen()
+            self.sock.listen(self.config['connection'])
         except socket.error as e:
             log.error("Socket server error : {}".format(e))
     
@@ -71,7 +74,7 @@ class Server:
                     thread = threading.Thread(target=self.handle_receive,args=(client,))
                     thread.setDaemon(True)
                     thread.start()
-                time.sleep(0.2)
+                time.sleep(self.config['handle_accept_sleep'])
             except ConnectionResetError:
                 
                 self.sub_connection(client)
@@ -93,7 +96,7 @@ class Server:
                     self.sub_connection(client)
                     client.close()
 
-                time.sleep(0.1)
+                time.sleep(self.config['handle_receive_sleep'])
             client.close()
         except OSError:
             self.sub_connection(client)
@@ -106,7 +109,7 @@ class Server:
                     print("Send to : {}".format(client))
                     client.sendall(b"Hello World")
 
-                time.sleep(2)
+                time.sleep(self.config['handle_callback'])
         except OSError:
             self.sub_connection(client)
             client.close()
@@ -142,7 +145,7 @@ class Server:
                     if connection:
                         self.subscriber_broadcast(connection,self.database,lock_database)
             self.subscriber_clear_cashed()
-            time.sleep(2)
+            time.sleep(self.config['handle_broadcast'])
     
     def run(self):
         log.info("Start server : {}:{}".format(self.host,self.port))
