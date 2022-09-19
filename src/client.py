@@ -21,10 +21,9 @@ class Client:
     
     def handle_recieve(self):
         while self.do_runing:
-            print("Wait receiving...")
             resp = self.sock.recv(self.BUFFER_SIZE)
             if resp:
-                print("Received data : {}".format(resp.decode()))
+                print("Received data : {}\r".format(resp.decode()))
             
             time.sleep(2)
 
@@ -32,11 +31,10 @@ class Client:
         while self.do_runing:
             data = input(':>')
             if data:
-                print("Send data : {}".format(data))
+                print("Send data : {}\r".format(data))
                 self.sock.sendall(data.encode())
             
             time.sleep(0.2)
-
 
     def run(self):
         print("Starting : {}:{}".format(self.host,self.port))
