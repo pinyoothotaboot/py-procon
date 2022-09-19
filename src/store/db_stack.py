@@ -1,3 +1,4 @@
+from inspect import stack
 import sys
 import os
 sys.path.append(os.getcwd())
@@ -107,6 +108,12 @@ class DbStack:
     def range(self,start=0,stop=-1) -> List:
         if self.is_empty():
             return []
+        
+        if not (start.isdigit() and stop.isdigit()):
+            return []
+        
+        start = int(start) if int(start) < len(self.stack) else 0
+        stop = int(stop) if (int(stop) > start) and (int(stop) < len(self.stack)) else -1
         
         datas = []
         datas = self.stack[start:stop]

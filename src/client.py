@@ -29,7 +29,7 @@ class Client:
 
     def handle_send(self):
         while self.do_runing:
-            data = input(':>')
+            data = input('{}:{}>'.format(self.host,self.port))
             if data:
                 print("Send data : {}\r".format(data))
                 self.sock.sendall(data.encode())
