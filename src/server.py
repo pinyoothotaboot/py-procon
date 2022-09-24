@@ -15,7 +15,7 @@ from read_config import initial_config
 log = Logger('SERVER').get_logger()
 
 class Server:
-    def __init__(self,host="127.0.0.1",port=3456):
+    def __init__(self):
         self.config = initial_config()
         self.host = self.config['host']
         self.port = self.config['port']
@@ -74,6 +74,7 @@ class Server:
                     thread = threading.Thread(target=self.handle_receive,args=(client,))
                     thread.setDaemon(True)
                     thread.start()
+
                 time.sleep(self.config['handle_accept_sleep'])
             except ConnectionResetError:
                 
@@ -152,6 +153,7 @@ class Server:
         thread = threading.Thread(target=self.handle_broadcast)
         thread.setDaemon(True)
         thread.start()
+
         self.handle_accept()
 
 if __name__ == "__main__":

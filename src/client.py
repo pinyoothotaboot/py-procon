@@ -1,3 +1,4 @@
+from multiprocessing.resource_sharer import stop
 import sys
 import socket
 import time
@@ -10,7 +11,7 @@ class Client:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.do_runing = True
         self.BUFFER_SIZE = 2048
-
+        self.count = 0
         self.connect()
     
     def connect(self):
@@ -23,9 +24,10 @@ class Client:
         while self.do_runing:
             resp = self.sock.recv(self.BUFFER_SIZE)
             if resp:
-                print("Received data : {}\r".format(resp.decode()))
+                print("{} :Received data : {}\r".format(self.count,resp.decode()))
+                self.count+=1
             
-            time.sleep(2)
+            time.sleep(0.1)
 
     def handle_send(self):
         while self.do_runing:
@@ -35,6 +37,7 @@ class Client:
                 self.sock.sendall(data.encode())
             
             time.sleep(0.2)
+        
 
     def run(self):
         print("Starting : {}:{}".format(self.host,self.port))
